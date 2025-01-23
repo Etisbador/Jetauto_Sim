@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- Gazebo robot name argument -->
+    <arg name="robot_name"      default="jetauto" />
+   
+    <!-- ROBOT arguments -->
+    <arg name="odom_frame"  		    default="odom"/>
+    <arg name="base_frame"  		    default="base_footprint"/>
+    <arg name="wheel_speed_topic"          default="jetauto_wheel_speed_sim"/>
+    <arg name="wheel_speed_command_topic"  default="jetauto_wheel_cmd_sim"/>
+    <arg name="robot_speed_command_topic"  default="jetauto_cmd_vel"/>
+    <arg name="lidar_view"                 default="false"/>
+    <arg name="publish_gazebo_odom"        default="true"/>
+
+    <!-- Spawn initial pos arguments -->
+    <arg name="initial_x"       default="0.0"/>
+    <arg name="initial_y"       default="0.0"/>
+    <arg name="initial_z"       default="0.0"/>
+    <arg name="initial_Y"       default="0.0"/>
+
+
+    <param name="publish_gazebo_odom" value= "$(arg publish_gazebo_odom)"/>
+    <param name="robot_description" command="$(find xacro)/xacro '$(find jetauto_descriptionV2)/urdf/jetauto_system.urdf.xacro'
+     odom_frame:=$(arg odom_frame)
+     base_frame:=$(arg base_frame) 
+     lidar_view:=$(arg lidar_view)
+     wheel_speed_topic:=$(arg wheel_speed_topic)
+     wheel_speed_command_topic:=$(arg wheel_speed_command_topic)
+     robot_speed_command_topic:=$(arg robot_speed_command_topic)
+     publish_gazebo_odom:=$(arg publish_gazebo_odom)" />
+     
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher" type="joint_state_publisher" />
+    
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+     <!-- Gazebo spawner node -->
+     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" 
+     args="-urdf -param robot_description -model $(arg robot_name)
+      -x $(arg initial_x) -y $(arg initial_y) -z $(arg initial_z) -Y $(arg initial_Y) " respawn="false" output="screen" />
+    
+  
+</launch>

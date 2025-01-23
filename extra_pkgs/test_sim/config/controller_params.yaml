@@ -1,0 +1,21 @@
+cinem_PD:
+  kp: 2.1
+  kd: 0.019
+
+cinem_PI:
+  kp: 1.1
+  ki: 0.0415
+
+cinem_Lyap:
+  kp: 1.9
+
+pid:
+  x_kp: 1.55
+  x_ki: 0.59
+  x_kd: 0.029
+  y_kp: 1.55
+  y_ki: 0.59
+  y_kd: 0.029
+  theta_kp: 2.2
+  theta_ki: 0.05
+  theta_kd: 0.00001

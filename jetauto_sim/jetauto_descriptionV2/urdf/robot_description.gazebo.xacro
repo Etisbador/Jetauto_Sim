@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<robot name="jetautoV2" xmlns:xacro="http://ros.org/wiki/xacro">
+
+   <gazebo>
+      <plugin name="mecanum_omnidirectional_drive_wc" filename="libgazebo_ros_mecanum_drive_wc.so">
+        <commandTopic>$(arg robot_speed_command_topic)</commandTopic>
+        <commandWheelVelTopic>$(arg wheel_speed_command_topic)</commandWheelVelTopic>
+        <odometryTopic>odom</odometryTopic>
+        <publishOdom>$(arg publish_gazebo_odom)</publishOdom>
+        <odometryFrame>$(arg odom_frame)</odometryFrame>
+        <wheelSpeedTopic>$(arg wheel_speed_topic)</wheelSpeedTopic>    
+        <robotBaseFrame>$(arg base_frame)</robotBaseFrame>
+        <LeftRear>wheel_joint_1</LeftRear>
+        <LeftFront>wheel_joint_2</LeftFront>
+        <RightFront>wheel_joint_3</RightFront>
+        <RightRear>wheel_joint_4</RightRear>
+        <odometryRate>100</odometryRate>      
+        <publishWheelTF>false</publishWheelTF>
+        <publishWheelJointState>true</publishWheelJointState>
+        <WheelTorque>15</WheelTorque>
+        <WheelSeparationW>0.206</WheelSeparationW> <!-- 0.116125 -->
+        <WheelSeparationL>0.195</WheelSeparationL> <!-- 0.097397 -->
+        <wheelAccel>20</wheelAccel>  
+        <wheelDiameter>0.097</wheelDiameter>
+        <publishOdom>true</publishOdom>
+        <isRollerModel>true</isRollerModel>
+      </plugin>
+  </gazebo>
+  
+  <!-- base_link -->
+  <gazebo reference="base_link">
+    <selfCollide>false</selfCollide>
+    <gravity>true</gravity>
+    <mu1>100</mu1>
+    <mu2>100</mu2>
+    <kp>1e30</kp>
+    <kd>1e20</kd>
+    <material>Gazebo/Green</material>
+  </gazebo>
+  
+    <!-- backshell -->
+  <gazebo reference="back_shell_link">
+    <selfCollide>false</selfCollide>
+    <gravity>true</gravity>
+    <mu1>100</mu1>
+    <mu2>100</mu2>
+    <kp>1e30</kp>
+    <kd>1e20</kd>
+    <material>Gazebo/Black</material>
+  </gazebo>
+  
+
+  
+
+</robot>

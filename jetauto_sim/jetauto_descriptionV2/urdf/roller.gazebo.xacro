@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<robot name="jetautoV2" xmlns:xacro="http://ros.org/wiki/xacro">
+  
+  <xacro:macro name="roller_gazebo_v0" params="prefix">
+	<gazebo reference="${prefix}">
+	  <selfCollide>false</selfCollide>
+    <gravity>true</gravity>
+    <mu1>300</mu1>
+    <mu2>300</mu2>
+    <kp>1e50</kp>
+    <kd>1e50</kd>
+    <material>Gazebo/Black</material>
+  </gazebo>
+  </xacro:macro>
+  
+  <!-- Rollor -->
+  <xacro:roller_gazebo_v0 prefix="roller_1_1"/>
+  <xacro:roller_gazebo_v0 prefix="roller_1_2"/>
+  <xacro:roller_gazebo_v0 prefix="roller_1_3"/>
+  <xacro:roller_gazebo_v0 prefix="roller_1_4"/>
+  <xacro:roller_gazebo_v0 prefix="roller_1_5"/>
+  <xacro:roller_gazebo_v0 prefix="roller_1_6"/>
+  <xacro:roller_gazebo_v0 prefix="roller_1_7"/>
+  <xacro:roller_gazebo_v0 prefix="roller_1_8"/>
+  <xacro:roller_gazebo_v0 prefix="roller_1_9"/>
+
+  <xacro:roller_gazebo_v0 prefix="roller_2_1"/>
+  <xacro:roller_gazebo_v0 prefix="roller_2_2"/>
+  <xacro:roller_gazebo_v0 prefix="roller_2_3"/>
+  <xacro:roller_gazebo_v0 prefix="roller_2_4"/>
+  <xacro:roller_gazebo_v0 prefix="roller_2_5"/>
+  <xacro:roller_gazebo_v0 prefix="roller_2_6"/>
+  <xacro:roller_gazebo_v0 prefix="roller_2_7"/>
+  <xacro:roller_gazebo_v0 prefix="roller_2_8"/>
+  <xacro:roller_gazebo_v0 prefix="roller_2_9"/>
+
+  <xacro:roller_gazebo_v0 prefix="roller_3_1"/>
+  <xacro:roller_gazebo_v0 prefix="roller_3_2"/>
+  <xacro:roller_gazebo_v0 prefix="roller_3_3"/>
+  <xacro:roller_gazebo_v0 prefix="roller_3_4"/>
+  <xacro:roller_gazebo_v0 prefix="roller_3_5"/>
+  <xacro:roller_gazebo_v0 prefix="roller_3_6"/>
+  <xacro:roller_gazebo_v0 prefix="roller_3_7"/>
+  <xacro:roller_gazebo_v0 prefix="roller_3_8"/>
+  <xacro:roller_gazebo_v0 prefix="roller_3_9"/>
+
+  <xacro:roller_gazebo_v0 prefix="roller_4_1"/>
+  <xacro:roller_gazebo_v0 prefix="roller_4_2"/>
+  <xacro:roller_gazebo_v0 prefix="roller_4_3"/>
+  <xacro:roller_gazebo_v0 prefix="roller_4_4"/>
+  <xacro:roller_gazebo_v0 prefix="roller_4_5"/>
+  <xacro:roller_gazebo_v0 prefix="roller_4_6"/>
+  <xacro:roller_gazebo_v0 prefix="roller_4_7"/>
+  <xacro:roller_gazebo_v0 prefix="roller_4_8"/>
+  <xacro:roller_gazebo_v0 prefix="roller_4_9"/>
+
+</robot>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Define the control and sim arguments -->
+  <arg name="test_type" default="COMP" />  <!-- angle, x_desviacion, y_desviacion, -->
+  <arg name="guardar_datos" default= "True" /> <!-- /parametro para guardar o no datos en un txt -->
+  <param name="guardar_datos" type="bool" value="$(arg guardar_datos)" />
+  
+  <param name="r"   type = "double"    value="0.0485"/>   <!-- wheel radius -->
+  <param name="lx"   type = "double"    value="0.0975"/>  <!-- distance in cm along the x axis from center between the two wheels to one of the wheels -->
+  <param name="ly"   type = "double"    value="0.103"/>   <!-- distance in cm along the y axis from center between the two wheels to one of the wheels -->
+  
+  <!-- Launch case -->
+  <group if="$(eval test_type == 'angle')">
+   <node name="test_s" pkg="test_sim" type="test_angle.py" output="screen" />
+  </group>
+
+  <group if="$(eval test_type == 'x_desviacion')">
+    <node name="test_cinem_PI" pkg="test_sim" type="test_x_desviacion.py" output="screen" />
+  </group>
+
+  <group if="$(eval test_type == 'y_desviacion')">
+    <node name="test_cinem_Lyap" pkg="test_sim" type="test_y_desviacion.py" output="screen" />
+  </group>
+  
+  <group if="$(eval test_type == 'COMP')">
+    <node name="test_pid" pkg="test_sim" type="compare_est_gazebo.py" output="screen" />
+  </group>
+
+  <node name="Pose_Estimation" pkg="jetauto_pose_estimation" type="jetauto_pose_estimation.py" output="screen"/>
+  <!-- <include file="$(find jetauto_drivers)/launch/jetauto_drivers.launch"/> -->
+  <include file="$(find jetauto_driver_speed)/launch/jetauto_driver_speed.launch"/>
+  
+  <include file="$(find jetauto_descriptionV2)/launch/display.launch"/> 
+
+</launch>
+

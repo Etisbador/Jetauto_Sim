@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot name="jetautoV2" xmlns:xacro="http://ros.org/wiki/xacro">
+  
+  <xacro:macro name="wheel_gazebo_v0" params="prefix">
+	<gazebo reference="wheel_${prefix}">
+	  <selfCollide>false</selfCollide>
+      <gravity>true</gravity>
+      <mu1>30</mu1>
+      <mu2>30</mu2>
+      <kp>1e90</kp>
+      <kd>1e90</kd>
+      <material>Gazebo/White</material>
+    </gazebo>
+  </xacro:macro>
+  
+      <!-- Wheel -->
+  <xacro:wheel_gazebo_v0 prefix="1"/>
+  <xacro:wheel_gazebo_v0 prefix="2"/>
+  <xacro:wheel_gazebo_v0 prefix="3"/>
+  <xacro:wheel_gazebo_v0 prefix="4"/>
+  
+  
+</robot>

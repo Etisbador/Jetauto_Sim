@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Define the control and sim arguments -->
+  <arg name="test_type" default="COMP" />  <!-- angle, x_desviacion, y_desviacion, -->
+  <arg name="guardar_datos" default= "True" /> <!-- /parametro para guardar o no datos en un txt -->
+  <param name="guardar_datos" type="bool" value="$(arg guardar_datos)" />
+  
+  <param name="r"   type = "double"    value="0.0485"/>   <!-- wheel radius -->
+  <param name="lx"   type = "double"    value="0.0975"/>  <!-- distance in cm along the x axis from center between the two wheels to one of the wheels -->
+  <param name="ly"   type = "double"    value="0.103"/>   <!-- distance in cm along the y axis from center between the two wheels to one of the wheels -->
+  
+  
+  <group if="$(eval test_type == 'COMP')">
+    <node name="test_pid" pkg="test_sim" type="compare_filter.py" output="screen" />
+  </group>
+
+  
+  <include file="$(find jetauto_drivers)/launch/jetauto_drivers.launch"/>
+
+</launch>
+

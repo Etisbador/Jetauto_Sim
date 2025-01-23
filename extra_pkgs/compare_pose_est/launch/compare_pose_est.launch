@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+<!--Comentario-->
+  <arg name="type" default="normal" doc="type [normal, modbus, hmodbus, can, hcan]"/>
+    
+  <node name="Compare_pose_est" pkg="compare_pose_est" type="compare_pose_est.py" output="screen"/>
+  <node name="Compute_Pose" pkg="compute_vel_pose" type="compute_vel_pose.py" output="screen"/>
+  <!--<node name="Wheels_PID" pkg="wheels_pid" type="wheels_pid.py" output="screen"/>-->
+
+</launch>

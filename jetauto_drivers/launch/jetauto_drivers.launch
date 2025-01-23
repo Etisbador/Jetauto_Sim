@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+<!--Comentario-->
+  <arg name="use_filter" default= "True" /> <!-- /parametro para guardar o no datos en un txt -->
+  
+  <param name="use_filter" type="bool" value="$(arg use_filter)" />
+  <node name="IMU_Encoder" pkg="jetauto_drivers" type="imu_encoder.py" output="screen"/>
+
+</launch>

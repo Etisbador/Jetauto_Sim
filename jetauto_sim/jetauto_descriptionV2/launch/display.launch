@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- ROBOT arguments -->
+    <arg name="odom_frame"  		    default="odom"/>
+    <arg name="base_frame"  		    default="base_footprint"/>
+    <arg name="wheel_speed_topic"          default="jetauto_wheel_speed_sim"/>
+    <arg name="wheel_speed_command_topic"  default="jetauto_wheel_cmd_sim"/>
+    <arg name="robot_speed_command_topic"  default="jetauto_cmd_vel"/>
+    <arg name="publish_gazebo_odom"        default="true"/>
+    
+    <!-- LIDAR arguments -->
+    <arg name="lidar_view"  default="true"/>
+    
+
+    
+    <!--
+    <param name="robot_description" command="$(find xacro)/xacro '$(find jetauto_descriptionV2)/urdf/jetauto_system.urdf.xacro'
+     odom_frame:=$(arg odom_frame)
+     base_frame:=$(arg base_frame) 
+     lidar_view:=$(arg lidar_view)
+     wheel_speed_topic:=$(arg wheel_speed_topic)
+     wheel_speed_command_topic:=$(arg wheel_speed_command_topic)
+     robot_speed_command_topic:=$(arg robot_speed_command_topic)
+     publish_gazebo_odom:=$(arg publish_gazebo_odom)" /> -->
+     
+
+    
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find jetauto_descriptionV2)/rviz/urdf_tf.rviz" />
+    
+</launch>

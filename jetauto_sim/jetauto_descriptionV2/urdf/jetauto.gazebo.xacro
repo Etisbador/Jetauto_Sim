@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="jetautoV2" xmlns:xacro="http://ros.org/wiki/xacro">
+	
+    <xacro:include filename="$(find jetauto_descriptionV2)/urdf/roller.gazebo.xacro"/>
+    <xacro:include filename="$(find jetauto_descriptionV2)/urdf/roller.transmission.xacro"/>
+    <xacro:include filename="$(find jetauto_descriptionV2)/urdf/wheel.gazebo.xacro"/>	
+    <xacro:include filename="$(find jetauto_descriptionV2)/urdf/robot_description.gazebo.xacro"/>
+
+    <!-- sensors -->
+    <xacro:include filename="$(find jetauto_descriptionV2)/urdf/imu.gazebo.xacro"/>
+    <xacro:include filename="$(find jetauto_descriptionV2)/urdf/lidar.gazebo.xacro"/>
+</robot>
+
+
+
+
+  
+  

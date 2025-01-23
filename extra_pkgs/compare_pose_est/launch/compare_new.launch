@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="Pose_Estimation" pkg="jetauto_pose_estimation" type="jetauto_pose_estimation.py" output="screen"/>
+  <include file="$(find jetauto_driver_speed)/launch/jetauto_driver_speed.launch"/>
+  <include file="$(find jetauto_descriptionV2)/launch/display.launch"/> 
+  <node name="Compare_pose_est" pkg="compare_pose_est" type="compare_new.py" output="screen"/>
+</launch>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="jetautoV2" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:include filename="$(find jetauto_descriptionV2)/urdf/jetauto.xacro"/>
+    <xacro:include filename="$(find jetauto_descriptionV2)/urdf/jetauto.gazebo.xacro"/>
+</robot>

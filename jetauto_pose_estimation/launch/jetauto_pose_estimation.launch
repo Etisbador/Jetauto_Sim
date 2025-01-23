@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+<!--Comentario-->
+
+  <param name="r"   type = "double"    value="0.0485"/>
+  <param name="lx"   type = "double"    value="0.0975"/>
+  <param name="ly"   type = "double"    value="0.103"/>
+
+  <node name="Pose_Estimation" pkg="jetauto_pose_estimation" type="jetauto_pose_estimation.py" output="screen"/>
+  <include file="$(find jetauto_drivers)/launch/jetauto_drivers.launch"/>
+
+</launch>
