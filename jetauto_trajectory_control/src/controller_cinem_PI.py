@@ -6,18 +6,21 @@ import rospy
 import rospkg
 import matplotlib.pyplot as plt
 import Paths as paths
-import numpy as np
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Pose, Point, Twist
 from math import sqrt
 import time
 from std_msgs.msg import Float32MultiArray, Header
+from nav_msgs.msg import Path
+from geometry_msgs.msg import PoseStamped
+from jetauto_interfaces.msg import imu_encoder
 from rosgraph_msgs.msg import Clock
 from gazebo_msgs.srv import SetModelState
 from gazebo_msgs.msg import ModelState
-from nav_msgs.msg import Path
-from geometry_msgs.msg import PoseStamped
+import math
+import numpy as np
+from math import atan2
 
 class PoseControl:
     def __init__(self):
@@ -27,8 +30,6 @@ class PoseControl:
         self.kp = rospy.get_param('cinem_PI/kp', 1.9)
         self.ki = rospy.get_param('cinem_PI/ki', 0.015)
         path_type = rospy.get_param('path_type', 'rectangle')
-        self.tm = rospy.get_param('tiempo_muestreo', '0.1')
-        self.tf = rospy.get_param('tiempo_total', '60')
         self.r = rospy.get_param('r', '0.0485')
         self.lx = rospy.get_param('lx', '0.0975')
         self.ly = rospy.get_param('ly', '0.103')
@@ -40,7 +41,8 @@ class PoseControl:
             rospy.Subscriber('/odom', Odometry, self.odom_callback)
         else:
             rospy.Subscriber('/jetauto_odom_sim', Odometry, self.odom_callback)
-            
+        
+        rospy.Subscriber('/imu_encoder_sim', imu_encoder, self.imu_callback)
         rospy.Subscriber('/clock', Clock, self.clock_callback)
         self.control_publisher = rospy.Publisher("wheel_setpoint", Float32MultiArray, queue_size=10)
         self.path_pub = rospy.Publisher('/path_ref', Path, queue_size=10)
@@ -58,8 +60,8 @@ class PoseControl:
             # Construct the directory path
             directory = os.path.join(package_path,'datos','PI')
             if not os.path.exists(directory):
-                os.makedirs(directory)  # Create the directory if it doesn't exist
-            self.file_name = os.path.join(directory, f"PI_{path_type}.txt")
+                os.makedirs(directory)  # Create the directory if it doesnt exist
+            self.file_name = os.path.join(directory, "PI_{}.txt".format(path_type))
             with open(self.file_name, "w") as file:
                 pass
             
@@ -104,69 +106,42 @@ class PoseControl:
 
         except rospy.ServiceException as e:
             rospy.logerr("Service call failed: %s", e)    
-        
-        self.speed = Twist()
       
         self.x = 0
         self.y = 0
         self.theta = 0.0
+        self.w1 = 0.0
+        self.w2 = 0.0
+        self.w3 = 0.0
+        self.w4 = 0.0
+        
         self.e_x_ant = 0
         self.e_y_ant = 0
         self.e_theta_ant = 0.0
-        self.x_error = []
-        self.y_error = []
-        self.theta_error = []
+
+        self.t = []
         self.x_sim = []
         self.y_sim = []
-        self.w1 = []
-        self.w2 = []
-        self.w3 = []
-        self.w4 = []
-        self.t = []          
+        self.theta_sim = []
+        self.w1_sim = []
+        self.w2_sim = []
+        self.w3_sim = []
+        self.w4_sim = []
+        self.w1_ref = []
+        self.w2_ref = []
+        self.w3_ref = []
+        self.w4_ref = []      
        
         ##Definir trayectoria
-        pth = paths.Paths(self.tm, self.tf)
-        self.time = pth.time()
-        
-        
-        if path_type == 'ellipse':
-            #Circulo/Elipse
-            a = 3   #eje principal (x)
-            b = 2   #ejesecundario (y)
-            center = [0, -b]   # centro
-            self.goalx, self.goaly = pth.ellipse(a, b, center)
-        elif path_type == 'lemniscate':
-            #Lemniscate/Forma 8
-            a = 2   #factor de escalamiento
-            center = [0, 0]
-            self.goalx, self.goaly = pth.lemniscate(a, center)
-        elif path_type == 'spiral':
-            #Espiral
-            a = 0.4   #radio inicial
-            b = 0.04   #razon de crecimiento
-            center = [0, -a]
-            self.goalx, self.goaly = pth.spiral(a, b, center)
-        elif path_type == 'line':
-            #Linea
-            start = [0, 0]   #coordenada inicial
-            end = [3, 5]     #coordenada final
-            self.goalx, self.goaly = pth.line(start, end)
-        elif path_type == 'sine':
-            #Sine
-            A = 1     #amplitud
-            f = 1/self.tf   #frecuencia
-            n = 5     # atenuación de crecimiento en x (center_x + t/n)
-            center = [0, 0]    #centro
-            self.goalx, self.goaly = pth.sine(A, f*self.tf, n ,center)
-        elif path_type == 'rectangle':
-            #Rectangulo
-            length = 3   #base (x)
-            width = 2    #altura (y)
-            center = [0, 0]   # centro
-            self.goalx, self.goaly = pth.rectangle(length,width,center)
-        else:
-            rospy.logwarn("Tipo de trayectoria desconocida: %s" % path_type)
-            self.goalx, self.goaly = [], []
+        pth = paths.Paths()
+        self.goalx    = pth.x
+        self.goalx_d = pth.vx
+        self.goaly    = pth.y
+        self.goaly_d = pth.vy
+        self.time     = pth.t
+        self.tm       = pth.Ts
+        self.goaltheta = pth.theta
+        self.goaltheta_d = pth.w
         
         #Definir Path referencia RVIZ
         self.path = Path()
@@ -206,62 +181,59 @@ class PoseControl:
         plt.axis('equal')  # Ensure aspect ratio is equal 
         plt.show()
 
+    def imu_callback(self, msg):
+        self.theta = msg.angle
+        self.w1 = msg.w1
+        self.w2 = msg.w2
+        self.w3 = msg.w3
+        self.w4 = msg.w4
 
     def odom_callback(self, msg):
         self.x = msg.pose.pose.position.x
         self.y = msg.pose.pose.position.y
         
-        rot_q = msg.pose.pose.orientation
-        (roll, pitch, self.theta) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
-        
     def clock_callback(self, msg):
         self.sim_time = msg.clock
         
-    def calculate_ISE(self, errors):
-        # Square each error value
-        squared_errors = np.square(errors)
-        # Integrate the squared errors (numerical integration using the trapezoidal rule)
-        ise = np.trapz(squared_errors)
-        return ise
-        
-    def write_file(self, t, x, y, theta, x_sim, y_sim, theta_sim, e_x, e_y, e_theta, w1, w2, w3, w4):
+    def append_data(self, t,x,y,theta,w1_sim,w2_sim,w3_sim,w4_sim,w1_ref,w2_ref,w3_ref,w4_ref):
+        self.t.append(t)
+        self.x_sim.append(x)
+        self.y_sim.append(y)
+        self.theta_sim.append(theta)
+        self.w1_sim.append(w1_sim)
+        self.w2_sim.append(w2_sim)
+        self.w3_sim.append(w3_sim)
+        self.w4_sim.append(w4_sim)
+        self.w1_ref.append(w1_ref)
+        self.w2_ref.append(w2_ref)
+        self.w3_ref.append(w3_ref)
+        self.w4_ref.append(w4_ref)
+
+    def write_file(self, t, x, y, theta, x_sim, y_sim, theta_sim, w1_sim, w2_sim, w3_sim, w4_sim, w1_ref, w2_ref, w3_ref, w4_ref):
         with open(self.file_name, "a") as file:
-            file.write(f"{t}\t{x}\t{y}\t{theta}\t{x_sim}\t{y_sim}\t{theta_sim}\t{e_x}\t{e_y}\t{e_theta}\t{w1}\t{w2}\t{w3}\t{w4}")
-            file.write("\n")
+            for i in range(0,len(self.goalx)): 
+                file.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(t[i], x[i], y[i], theta[i], x_sim[i], y_sim[i], theta_sim[i], w1_sim[i], w2_sim[i], w3_sim[i], w4_sim[i], w1_ref[i], w2_ref[i], w3_ref[i], w4_ref[i]))
         
     def plot(self):
         win_size_x = 15
-        win_size_y = 10      
+        win_size_y = 10   
+        #Error x
+        #plt.plot(self.t,self.x_error)
+        #plt.xlabel('time')
+        #plt.ylabel('x error')
+        #plt.title('X Error')
+        #plt.grid(True)
+        #plt.show()
         
-        ISE_X = self.calculate_ISE(self.x_error)
-        ISE_Y = self.calculate_ISE(self.y_error)
-        ISE_Theta = self.calculate_ISE(self.theta_error)
+        #Error y
+        #plt.plot(self.t,self.y_error)
+        #plt.xlabel('time')
+        #plt.ylabel('y error')
+        #plt.title('Y Error')
+        #plt.grid(True)
+        #plt.show()
         
-        #Boxplot Error x, y
-        plt.figure(figsize=(win_size_x, win_size_y))
-        plt.boxplot([self.x_error, self.y_error], patch_artist=True, whis='range')
-        plt.xticks([1, 2], ['Error X [m]', 'Error Y [m]'])
-        plt.ylabel('Error Magnitude')
-        plt.title('Boxplot of X and Y Errors')
-        plt.grid(True)
-        # Adding ISE_X and ISE_Y values as text above the boxes
-        plt.text(1, max(self.x_error) * 1.05, f'ISE_X = {ISE_X:.3f}', ha='center', fontsize=10)
-        plt.text(2, max(self.y_error) * 1.05, f'ISE_Y = {ISE_Y:.3f}', ha='center', fontsize=10)
-        plt.show()
-
-        #Boxplot Error orientacion
-        plt.figure(figsize=(win_size_x, win_size_y))
-        plt.boxplot([self.theta_error], patch_artist=True, whis='range')
-        plt.xticks([1], ['Error θ [rad]'])  # Only one boxplot, so one label
-        plt.ylabel('Error Magnitude')
-        plt.title('Boxplot of Theta (Orientation) Error')
-        plt.grid(True)
-        # Adding ISE_Theta value as text above the box
-        plt.text(1, max(self.theta_error) * 1.05, f'ISE_Theta = {ISE_Theta:.3f}', ha='center', fontsize=10)
-        plt.show()
-        
-               
-        #Comparación trayectorias
+        #Comparacion trayectorias
         plt.figure(figsize=(win_size_y, win_size_y))
         plt.plot(self.goalx, self.goaly,label='Referencia')
         plt.plot(self.x_sim,self.y_sim,label='Simulacion')
@@ -275,42 +247,47 @@ class PoseControl:
         plt.axis('equal')  # Ensure aspect ratio is equal 
         plt.show() 
         
-        #Señales de control
-        plt.figure(figsize=(win_size_x, win_size_y))
-        plt.plot(self.t, self.w1,label='w1',linewidth=0.5)
-        plt.plot(self.t, self.w2,label='w2',linewidth=0.5)
-        plt.plot(self.t, self.w3,label='w3',linewidth=0.5)
-        plt.plot(self.t, self.w4,label='w4',linewidth=0.5)
-        plt.xlabel('Tiempo [s]')
-        plt.ylabel('Velocidad [rad/s]')
-        plt.title('Señal de control ruedas')
-        plt.grid(True)
-        plt.legend()
-        plt.show() 
+        #Senales de Contol
+        #plt.plot(self.t, self.w1,label='w1')
+        #plt.plot(self.t,self.w2,label='w2')
+        #plt.plot(self.t, self.w3,label='w3')
+        #plt.plot(self.t,self.w4,label='w4')
+        #plt.xlabel('x')
+        #plt.ylabel('y')
+        #plt.title('Velocidad ruedas')
+        #plt.grid(True)
+        #plt.legend() 
+        #plt.show()
+    
+    def get_inv_Jacobian(self,th):
+        th1 = th + np.pi/4
+        r2 = np.sqrt(2)
+        J_inv = np.array([[r2 * np.cos(th1) , r2 * np.sin(th1), -(self.lx + self.ly)],
+                          [r2 * np.sin(th1) ,-r2 * np.cos(th1), -(self.lx + self.ly)],
+                          [r2 * np.cos(th1) , r2 * np.sin(th1),  (self.lx + self.ly)],
+                          [r2 * np.sin(th1) ,-r2 * np.cos(th1),  (self.lx + self.ly)]])
+        return J_inv
     
     def run(self):
     
-        ref_theta = 0
         init_time = self.sim_time
         last_time = init_time
                
         for i in range(0,len(self.goalx)):
             
-            if i > 0:
-                while not rospy.is_shutdown() and (self.sim_time-init_time).to_sec() < self.time[i]:
-                    pass 
+            while not rospy.is_shutdown() and (self.sim_time-init_time).to_sec() < self.time[i]:
+                pass 
             
             last_time = self.sim_time
             
-            dt = (self.sim_time-last_time).to_sec()
-            
             e_x = self.goalx[i] - self.x
             e_y = self.goaly[i] - self.y
-            e_theta = ref_theta - self.theta
+            e_theta = self.goaltheta[i] - self.theta
+            e_theta = (e_theta + np.pi) % (2*np.pi) - np.pi
             
-            ei_x = self.e_x_ant + e_x * dt
-            ei_y = self.e_y_ant + e_y * dt
-            ei_theta = self.e_theta_ant + e_theta * dt
+            ei_x = self.e_x_ant + e_x * self.tm
+            ei_y = self.e_y_ant + e_y * self.tm
+            ei_theta = self.e_theta_ant + e_theta * self.tm
             
             acx = (self.kp * e_x + self.ki*ei_x)
             acy = (self.kp * e_y + self.ki*ei_y)
@@ -320,41 +297,23 @@ class PoseControl:
             self.e_y_ant = e_y
             self.e_theta_ant = e_theta
             
-            self.x_sim.append(self.x)
-            self.y_sim.append(self.y)
-
-            theta_1 = self.theta + np.pi / 4
-            J1 = [np.sqrt(2)*np.cos(theta_1),np.sqrt(2)*np.sin(theta_1),np.sqrt(2)*np.cos(theta_1),np.sqrt(2)*np.sin(theta_1)]
-            J2 = [np.sqrt(2)*np.sin(theta_1),-np.sqrt(2)*np.cos(theta_1),np.sqrt(2)*np.sin(theta_1),-np.sqrt(2)*np.cos(theta_1)]
-            J3 = [-1/(self.lx + self.ly), -1/(self.lx + self.ly), 1/(self.lx + self.ly), 1/(self.lx + self.ly)]
-            J_array = np.array([J1,J2,J3])
-            J = (self.r/4) * J_array
-            J_inv = np.linalg.pinv(J)
+            u = np.array([[acx],[acy],[acw]])
+            J_inv = self.get_inv_Jacobian(self.theta)
+            w = np.dot(J_inv,u)/self.r
+            w1_aux = w[0,0]
+            w2_aux = w[1,0]
+            w3_aux = w[2,0]
+            w4_aux = w[3,0]
+            a = 9.00
+            w1 = max(min(w1_aux, a), -a)
+            w2 = max(min(w2_aux, a), -a)
+            w3 = max(min(w3_aux, a), -a)
+            w4 = max(min(w4_aux, a), -a)
             
-            ac_vector = np.array([[acx],[acy],[acw]])
+            self.append_data((last_time-init_time).to_sec(),self.x,self.y,self.theta,self.w1,self.w2,self.w3,self.w4,w1,w2,w3,w4)
             
-            W = J_inv @ ac_vector        
-            
-            w1_aux,w2_aux,w3_aux,w4_aux = W.flatten()
-
-            w1 = max(min(w1_aux, 9), -9)
-            w2 = max(min(w2_aux, 9), -9)
-            w3 = max(min(w3_aux, 9), -9)
-            w4 = max(min(w4_aux, 9), -9)
-            
-            self.w1.append(w1)
-            self.w2.append(w2)
-            self.w3.append(w3)
-            self.w4.append(w4)
-                            
-            # Publish the stop message
+            # Publish the wheels message
             self.control_publisher.publish(Float32MultiArray(data=[w1, w2, w3, w4]))
-                          
-            print([e_x,e_y,(last_time-init_time).to_sec()])
-            self.x_error.append(e_x)
-            self.y_error.append(e_y)
-            self.theta_error.append(e_theta)
-            self.t.append((last_time-init_time).to_sec())
             
             #Append pose sim para graficar en RVIZ
             self.pose = PoseStamped()
@@ -368,11 +327,11 @@ class PoseControl:
             self.path_sim.poses.append(self.pose)
             
             self.path_sim_pub.publish(self.path_sim)
-
-            if self.guardar_datos:
-                self.write_file((last_time-init_time).to_sec(),self.goalx[i], self.goaly[i], ref_theta, self.x, self.y, self.theta, e_x, e_y, e_theta, w1, w2, w3, w4)
-
+            
         self.control_publisher.publish(Float32MultiArray(data=[0, 0, 0, 0]))
+        if self.guardar_datos:
+                self.write_file(self.t,self.goalx, self.goaly, self.goaltheta, self.x_sim, self.y_sim, self.theta_sim, self.w1_sim, self.w2_sim, self.w3_sim, self.w4_sim, self.w1_ref, self.w2_ref, self.w3_ref, self.w4_ref)
+            
         self.plot()
 
 if __name__ == "__main__":
@@ -383,5 +342,5 @@ if __name__ == "__main__":
     except Exception as e:
         rospy.logerr(str(e))
     finally:
-        node.control_publisher.publish(Float32MultiArray(data=[0, 0, 0, 0]))
+        #node.control_publisher.publish(Float32MultiArray(data=[0, 0, 0, 0]))
         sys.exit()

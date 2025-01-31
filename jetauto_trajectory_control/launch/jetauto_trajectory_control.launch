@@ -2,26 +2,34 @@
 <launch>
 
   <!-- Define the control and sim arguments -->
-  <arg name="controller_type" default="Lyap" />  <!-- Lyap, PD, PI, PID, COMP-->
-  <arg name="path_type" default="ellipse" /> <!-- ellipse, lemniscate, spiral, line, sine, rectangle -->
-  <arg name="tiempo_muestreo" default="0.02" /> <!-- A valores bajos < 0.015, no se alcanza a hacer append -> error -->
-  <arg name="tiempo_total" default="50" /> <!-- /odom (gazebo), /jetauto_odom_sim (pose estimator) -->
-  <arg name="guardar_datos" default= "True" /> <!-- /parametro para guardar o no datos en un txt -->
+  <arg name="controller_type"  default= "Lyap" />         <!-- Lyap, PD, PI, PID fuzzyPD-->
+  <arg name="path_type"        default= "ellipse" />  <!-- ellipse, lemniscate, line, sine, rectangle , spiral-->
+  <arg name="guardar_datos"    default= "True" />       <!-- /parametro para guardar o no datos en un txt -->
   
-  <!-- Load parameters based on the controller type -->
-  <param name="path_type" type="str" value="$(arg path_type)" />
-  <param name="tiempo_muestreo" type="double" value="$(arg tiempo_muestreo)" />
-  <param name="tiempo_total" type="double" value="$(arg tiempo_total)" />
-  <param name="guardar_datos" type="bool" value="$(arg guardar_datos)" />
-
   <param name="r"   type = "double"    value="0.0485"/>   <!-- wheel radius -->
   <param name="lx"   type = "double"    value="0.0975"/>  <!-- distance in cm along the x axis from center between the two wheels to one of the wheels -->
   <param name="ly"   type = "double"    value="0.103"/>   <!-- distance in cm along the y axis from center between the two wheels to one of the wheels -->
   
+  <param name="path_type"     type="str" value="$(arg path_type)" />
+  <param name="guardar_datos" type="bool" value="$(arg guardar_datos)" />
+  
+  
+  <!-- Load trajectory parameters -->
+  <rosparam file="$(find jetauto_trajectory_control)/config/trajectory_params.yaml" command="load" />
+  <!-- Load controller parameters -->
   <rosparam file="$(find jetauto_trajectory_control)/config/controller_params.yaml" command="load" />
+  <!-- Load FIS -->
+  <param name="path_json" type="string" value="$(find jetauto_trajectory_control)/config/Mandamijson.json" />
+  
+
 
 
   <!-- Launch case -->
+   <group if="$(eval controller_type == 'fuzzyPD')">
+   <node name="controller_cinem_fuzzyPD" pkg="jetauto_trajectory_control" type="fuzzyPD.py" output="screen" />
+  </group>
+
+
   <group if="$(eval controller_type == 'PD')">
    <node name="controller_cinem_PD" pkg="jetauto_trajectory_control" type="controller_cinem_PD.py" output="screen" />
   </group>
@@ -35,11 +43,7 @@
   </group>
 
   <group if="$(eval controller_type == 'PID')">
-    <node name="controller_pid" pkg="jetauto_trajectory_control" type="controller_pid.py" output="screen" />
-  </group>
-  
-  <group if="$(eval controller_type == 'COMP')">
-    <node name="controller_pid" pkg="jetauto_trajectory_control" type="compare_wheels.py" output="screen" />
+    <node name="controller_pid" pkg="jetauto_trajectory_control" type="controller_cinem_PID.py" output="screen" />
   </group>
 
   <node name="Pose_Estimation" pkg="jetauto_pose_estimation" type="jetauto_pose_estimation.py" output="screen"/>
