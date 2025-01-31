@@ -177,6 +177,16 @@ class PoseControl:
         plt.axis('equal')  # Ensure aspect ratio is equal 
         plt.show()
         
+        
+        #Graficar trayectoria a seguir
+        plt.figure(figsize=(10, 10))
+        plt.plot(self.time, self.goaltheta_d)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Trayectoria a seguir')
+        plt.grid(True)
+        plt.show()
+        
     def imu_callback(self, msg):
         self.theta = msg.angle
         self.w1 = msg.w1

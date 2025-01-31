@@ -59,7 +59,11 @@ class Paths:
                 if i == 0:
                     w[0] = 0
                 if i > 0:
-                    w[i] = (theta[i] - theta[i-1])/Ts
+                    delta_theta = theta[i] - theta[i-1]
+                    if (abs(delta_theta)>=2*np.pi-0.1):
+                        w[i] = w[i-1]
+                    else:
+                        w[i] = delta_theta/Ts
         
         self.Tf = Tf
         self.Ts = Ts
@@ -91,7 +95,11 @@ class Paths:
                 if i == 0:
                     w[0] = 0
                 if i > 0:
-                    w[i] = (theta[i] - theta[i-1])/Ts
+                    delta_theta = theta[i] - theta[i-1]
+                    if (abs(delta_theta)>=2*np.pi-0.1):
+                        w[i] = w[i-1]
+                    else:
+                        w[i] = delta_theta/Ts
 
         self.Tf = Tf
         self.Ts = Ts
@@ -127,7 +135,11 @@ class Paths:
                 if i == 0:
                     w[0] = 0
                 if i > 0:
-                    w[i] = (theta[i] - theta[i-1])/Ts
+                    delta_theta = theta[i] - theta[i-1]
+                    if (abs(delta_theta)>=2*np.pi-0.1):
+                        w[i] = w[i-1]
+                    else:
+                        w[i] = delta_theta/Ts
 
         self.Tf = Tf
         self.Ts = Ts
@@ -164,7 +176,11 @@ class Paths:
                 if i == 0:
                     w[0] = 0
                 if i > 0:
-                    w[i] = (theta[i] - theta[i-1])/Ts
+                    delta_theta = theta[i] - theta[i-1]
+                    if (abs(delta_theta)>=2*np.pi-0.1):
+                        w[i] = w[i-1]
+                    else:
+                        w[i] = delta_theta/Ts
         
         self.Tf = Tf
         self.Ts = Ts
@@ -197,7 +213,11 @@ class Paths:
                 if i == 0:
                     w[0] = 0
                 if i > 0:
-                    w[i] = (theta[i] - theta[i-1])/Ts
+                    delta_theta = theta[i] - theta[i-1]
+                    if (abs(delta_theta)>=2*np.pi-0.1):
+                        w[i] = w[i-1]
+                    else:
+                        w[i] = delta_theta/Ts
         
         self.Tf = Tf
         self.Ts = Ts
@@ -258,7 +278,11 @@ class Paths:
                 if i == 0:
                     w[0] = 0
                 if i > 0:
-                    w[i] = (theta[i] - theta[i-1])/Ts
+                    delta_theta = theta[i] - theta[i-1]
+                    if (abs(delta_theta)>=2*np.pi-0.1):
+                        w[i] = w[i-1]
+                    else:
+                        w[i] = delta_theta/Ts
         
         self.Tf = Tf
         self.Ts = Ts

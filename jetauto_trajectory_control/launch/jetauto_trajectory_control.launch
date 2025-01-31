@@ -3,7 +3,7 @@
 
   <!-- Define the control and sim arguments -->
   <arg name="controller_type"  default= "Lyap" />         <!-- Lyap, PD, PI, PID fuzzyPD-->
-  <arg name="path_type"        default= "ellipse" />  <!-- ellipse, lemniscate, line, sine, rectangle , spiral-->
+  <arg name="path_type"        default= "lemniscate" />  <!-- ellipse, lemniscate, line, sine, rectangle , spiral-->
   <arg name="guardar_datos"    default= "True" />       <!-- /parametro para guardar o no datos en un txt -->
   
   <param name="r"   type = "double"    value="0.0485"/>   <!-- wheel radius -->

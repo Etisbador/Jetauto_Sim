@@ -1,17 +1,17 @@
 ellipse:
-  parameters: [1, 1, 0, -1, 0.02, 60, True]   # [a, b, x_center, y_center, Ts, Tm, use angle ref]
+  parameters: [1, 1, 0, -1, 0.03, 60, True]   # [a, b, x_center, y_center, Ts, Tm, use angle ref]
 
 rectangle:
-  parameters: [3, 2, 0, 0, 0.02, 60, True]    # [length, width, x_center, y_center, Ts, Tm, use angle ref]
+  parameters: [3, 2, 0, 0, 0.03, 60, True]    # [length, width, x_center, y_center, Ts, Tm, use angle ref]
 
 lemniscate:
-  parameters: [2, 2, 0, 0, 0.02, 60, True]    # [a, b, x_center, y_center, Ts, Tm, use angle ref]
+  parameters: [2, 2, 0, 0, 0.03, 60, True]    # [a, b, x_center, y_center, Ts, Tm, use angle ref]
 
 sine:
-  parameters: [1, 5, 2,0, 0, 0.02, 60, True]    # [A, n,freq, x_center, y_center, Ts, Tm, use angle ref]
+  parameters: [1, 5, 2,0, 0, 0.03, 60, True]    # [A, n,freq, x_center, y_center, Ts, Tm, use angle ref]
   
 line:
-  parameters: [0, 0, 3, 5, 0.02, 60, True]    # [x_start, y_start, x_end, y_end, Ts, Tm, use angle ref]
+  parameters: [0, 0, 3, 5, 0.03, 60, True]    # [x_start, y_start, x_end, y_end, Ts, Tm, use angle ref]
   
 spiral:
-  parameters: [0.4, 0.04, 0, -0.4, 0.02, 60, True]    # [a, b, x_center, y_center, Ts, Tm, use angle ref]
+  parameters: [0.4, 0.04, 0, -0.4, 0.03, 60, True]    # [a, b, x_center, y_center, Ts, Tm, use angle ref]
